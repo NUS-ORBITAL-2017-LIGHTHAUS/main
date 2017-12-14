@@ -16,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.dickson.lighthausproject.camera.CameraActivity;
-import com.example.dickson.lighthausproject.camera.CameraPreview;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
