@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private boolean isCameraConfigured = false;
     private boolean pairedCheck = false;
     private boolean bluetoothCheck = false;
+    private boolean exitStatusCheck = false; //Used as a flag to indicate when to check paired status such that it does not always check at every "exit application attempt"
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static int flag = 0;
@@ -122,10 +123,14 @@ public class MainActivity extends AppCompatActivity
         Log.d("CDA", "onBackPressed Called");
         AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
         builder1.setMessage("Exit Application?");
+        // Makes it unable to cancel from outside.
+        builder1.setCancelable(false);
+        exitStatusCheck = true;
         builder1.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                exitStatusCheck = true;
                 Intent startMain = new Intent(Intent.ACTION_MAIN);
                 startMain.addCategory(Intent.CATEGORY_HOME);
                 startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -139,6 +144,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                exitStatusCheck = false;
             }
         });
         AlertDialog alert1 = builder1.create();
@@ -315,7 +321,8 @@ public class MainActivity extends AppCompatActivity
                 isCameraTurnedOn = false;
                 return;
             } else {
-                if(!pairedCheck) {
+                Log.d(TAG, "exitStatusCheck!" + exitStatusCheck);
+                if(!pairedCheck && !exitStatusCheck) {
                     checkPairedStatus();
                 }
             }
@@ -329,6 +336,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+        exitStatusCheck = false;
         FirebaseUser user = mAuth.getCurrentUser();
         System.out.println("user " + user);
         if(user == null) {
@@ -336,7 +344,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
         }
         if (mBluetoothAdapter.isEnabled()) {
-            if(!pairedCheck) {
+            Log.d(TAG, "exitStatusCheck!" + exitStatusCheck);
+            if(!pairedCheck && !exitStatusCheck) {
                 checkPairedStatus();
             }
         } else {
@@ -456,6 +465,7 @@ public class MainActivity extends AppCompatActivity
     public void checkPairedStatus() {
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
         AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setCancelable(false);
         builder1.setMessage("Proceed to pair new devices?");
         builder1.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
